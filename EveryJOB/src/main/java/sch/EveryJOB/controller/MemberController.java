@@ -1,8 +1,12 @@
 package sch.EveryJOB.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import sch.EveryJOB.domain.Disabled;
 import sch.EveryJOB.domain.Member;
-import sch.EveryJOB.domain.MemberRequestDTO;
+import sch.EveryJOB.domain.dto.MemberLoginRequestDTO;
+import sch.EveryJOB.domain.dto.MemberRequestDTO;
+import sch.EveryJOB.domain.dto.MemberResponseDTO;
 import sch.EveryJOB.service.MemberService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -21,49 +25,39 @@ public class MemberController {
     @PostMapping("/join")
     public ResponseEntity<String> join(@RequestBody MemberRequestDTO memberRequestDTO) {
         
-        Member member = memberRequestDTO.toMember();
-        Disabled disabled = memberRequestDTO.toDisabled();
+        System.out.println("memberRequestDTO.getAccountId() = " + memberRequestDTO.getAccountId());
+        System.out.println("memberRequestDTO.getPassword() = " + memberRequestDTO.getPassword());
         
-        System.out.println("member.getAccountId() = " + member.getAccountId());
-        System.out.println("member.getPassword() = " + member.getPassword());
-        
-        boolean is_join = memberService.joinMember(member, disabled);
-        
-        if (!is_join) {
-            System.out.println("아이디 중복");
-            return new ResponseEntity<>("아이디 중복", HttpStatus.BAD_REQUEST);
-        }
+        memberService.joinMember(memberRequestDTO);
         
         System.out.println("회원가입 성공");
         return new ResponseEntity<>("회원가입 성공", HttpStatus.OK);
     }
     
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Member member,
+    public ResponseEntity<String> login(@RequestBody MemberLoginRequestDTO memberLoginRequestDTO,
                                         HttpSession session) {
-        System.out.println("member.getAccountId() = " + member.getAccountId());
-        System.out.println("member.getPassword() = " + member.getPassword());
         
-        boolean isFind = memberService.existsMemberAccount(member);
-        if (!isFind) {
-            System.out.println("존재하지 않는 아이디");
-            return new ResponseEntity<>("존재하지 않는 아이디", HttpStatus.BAD_REQUEST);
-        }
+        System.out.println("member.getAccountId() = " + memberLoginRequestDTO.getAccountId());
+        System.out.println("member.getPassword() = " + memberLoginRequestDTO.getPassword());
         
+        memberService.loginMember(memberLoginRequestDTO);
         
-        boolean isLogin = memberService.loginMember(member);
-        if (!isLogin) {
-            System.out.println("비밀번호 불일치");
-            return new ResponseEntity<>("비밀번호 불일치", HttpStatus.BAD_REQUEST);
-        }
-        
-        session.setAttribute("session", member);
+        session.setAttribute("accountId", memberLoginRequestDTO.getAccountId());
         
         System.out.println("로그인 성공");
         return new ResponseEntity<>("로그인 성공", HttpStatus.OK);
     }
     
-    
+    @ResponseBody
+    @GetMapping
+    public MemberResponseDTO readMember(HttpSession session) {
+        
+        String accountId = (String) session.getAttribute("accountId");
+        
+        return memberService.readMember(accountId); 
+    }
+
 }
 
 

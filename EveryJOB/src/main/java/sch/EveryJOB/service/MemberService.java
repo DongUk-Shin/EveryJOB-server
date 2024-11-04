@@ -1,10 +1,16 @@
 package sch.EveryJOB.service;
 
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import sch.EveryJOB.common.error.MemberErrorCode;
+import sch.EveryJOB.common.exception.CustomException;
 import sch.EveryJOB.domain.Disabled;
 import sch.EveryJOB.domain.Member;
+import sch.EveryJOB.domain.dto.MemberLoginRequestDTO;
+import sch.EveryJOB.domain.dto.MemberRequestDTO;
+import sch.EveryJOB.domain.dto.MemberResponseDTO;
 import sch.EveryJOB.repository.DisabledRepository;
 import sch.EveryJOB.repository.MemberRepository;
 
@@ -18,40 +24,60 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final DisabledRepository disabledRepository;
     
-    public boolean joinMember(Member member, Disabled disabled) {
+    @Transactional
+    public void joinMember(MemberRequestDTO memberRequestDTO) {
         
-        Optional<Member> optMember = memberRepository.findByAccountId(member.getAccountId());
+        boolean b = memberRepository.existsByAccountId(memberRequestDTO.getAccountId());
         
-        if (optMember.isPresent()) {
-            //이미 존재하는 회원인 경우
-            return false;
+        if (b) {
+            throw new CustomException(MemberErrorCode.MEMBER_ALREADY_EXIST);
         }
         
-        // disabled가 null이 아닌 경우 연관관계 설정 후 저장
-        if (disabled != null) {
-            disabledRepository.save(disabled);
-            member.setDisabled(disabled); // member와 disabled 간의 관계 설정
-        }
-        
-        memberRepository.save(member);
-        return true;
+        memberRepository.save(Member.builder()
+                .accountId(memberRequestDTO.getAccountId())
+                .password(memberRequestDTO.getPassword())
+                .name(memberRequestDTO.getName())
+                .gender(memberRequestDTO.getGender())
+                .age(memberRequestDTO.getAge())
+                .email(memberRequestDTO.getEmail())
+                .call_info(memberRequestDTO.getCall_info())
+                .address(memberRequestDTO.getAddress())
+                .intro(memberRequestDTO.getAddress())
+                .disabled(null)
+                .build());
     }
     
-    public boolean loginMember(Member member) {
+    @Transactional
+    public void loginMember(MemberLoginRequestDTO memberLoginRequestDTO) {
         
-        Optional<Member> optMember = memberRepository.findByAccountId(member.getAccountId());
-        Member foundMember = optMember.get();
+        Member member = memberRepository.findByAccountId(memberLoginRequestDTO.getAccountId()).orElseThrow(
+                () -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
         
-        if (foundMember.getPassword().equals(member.getPassword())) {
-            return true;
+        if (!memberLoginRequestDTO.getPassword().equals(member.getPassword())) {
+            throw new CustomException(MemberErrorCode.MEMBER_WRONG_PASSWORD);
         }
         
-        return false;
     }
     
-    public boolean existsMemberAccount(Member member) {
-        return memberRepository.existsByAccountId(member.getAccountId());
+    @Transactional
+    public MemberResponseDTO readMember(String accountId) {
+        
+        Member member = memberRepository.findByAccountId(accountId).orElseThrow(
+                () -> new CustomException(MemberErrorCode.MEMBER_SESSION_ERROR));
+        
+        return MemberResponseDTO.builder()
+                .accountId(member.getAccountId())
+                .name(member.getName())
+                .gender(member.getGender())
+                .age(member.getAge())
+                .email(member.getEmail())
+                .call_info(member.getCall_info())
+                .address(member.getAddress())
+                .intro(member.getAddress())
+                //.disabled_type(member.getDisabled())
+                .build();
     }
+    
     
     public List<Member> allMembers() {
         return memberRepository.findAll();
@@ -60,9 +86,6 @@ public class MemberService {
     public List<Disabled> allDisableds() {
         return disabledRepository.findAll();
     }
-    
-    
-    
     
     /*@Transactional
     public void updateDisabilityInfo(Member member, Disabled disabled) {
