@@ -1,7 +1,6 @@
 package sch.EveryJOB.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import sch.EveryJOB.domain.Disabled;
 import sch.EveryJOB.domain.Member;
 import sch.EveryJOB.domain.dto.MemberLoginRequestDTO;
@@ -13,11 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/member")
 public class MemberController {
     
     private final MemberService memberService;
@@ -50,7 +48,7 @@ public class MemberController {
     }
     
     @ResponseBody
-    @GetMapping
+    @GetMapping("/detail")
     public MemberResponseDTO readMember(HttpSession session) {
         
         String accountId = (String) session.getAttribute("accountId");
