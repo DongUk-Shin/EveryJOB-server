@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Location {
