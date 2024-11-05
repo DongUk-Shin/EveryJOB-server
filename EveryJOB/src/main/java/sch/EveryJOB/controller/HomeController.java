@@ -1,5 +1,6 @@
 package sch.EveryJOB.controller;
 
+import org.springframework.web.bind.annotation.ResponseBody;
 import sch.EveryJOB.domain.Disabled;
 import sch.EveryJOB.domain.Location;
 import sch.EveryJOB.domain.Member;
@@ -24,6 +25,7 @@ public class HomeController {
     private final LocationService locationService;
     private final MemberService memberService;
     
+    @ResponseBody
     @GetMapping("/")
     public String home() {
         return "home";
