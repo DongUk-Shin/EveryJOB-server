@@ -30,15 +30,15 @@ public class HomeController {
     public String home() {
         return "home";
     }
+    
+    
     @GetMapping("/db")
     public String db(Model model) {
         List<Member> members = memberService.allMembers();
-        List<Disabled> disables = memberService.allDisableds();
         
         model.addAttribute("members", members);
-        model.addAttribute("disables", disables);
         
-        return "test/db";
+        return "member-db";
     }
     
     

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Members</title>
+</head>
+<body>
+<h1>Member List</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Account ID</th>
+        <th>Password</th>
+        <th>Name</th>
+        <th>Gender</th>
+        <th>Age</th>
+        <th>Email</th>
+        <th>Call Info</th>
+        <th>Address</th>
+        <th>Intro</th>
+        <th>Disabled</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="member : ${members}">
+        <td th:text="${member.id}">ID</td>
+        <td th:text="${member.accountId}">Account ID</td>
+        <td th:text="${member.password}">Password</td>
+        <td th:text="${member.name}">Name</td>
+        <td th:text="${member.gender}">Gender</td>
+        <td th:text="${member.age}">Age</td>
+        <td th:text="${member.email}">Email</td>
+        <td th:text="${member.call_info}">Call Info</td>
+        <td th:text="${member.address}">Address</td>
+        <td th:text="${member.intro}">Intro</td>
+        <td th:text="${member.disabled != null ? 'Yes' : 'No'}">Disabled</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
